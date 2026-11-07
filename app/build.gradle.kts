@@ -11,8 +11,8 @@ android {
         applicationId = "com.dedetakip.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.4"
     }
 
     // Sabit imza: CI, gizli KEYSTORE_B64 secret'ından app/dede.keystore dosyasını yazar.

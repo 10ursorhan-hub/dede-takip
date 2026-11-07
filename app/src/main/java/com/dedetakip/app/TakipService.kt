@@ -125,9 +125,12 @@ class TakipService : LifecycleService() {
             val fused = LocationServices.getFusedLocationProviderClient(this)
             val loc = Tasks.await(fused.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null), 30, TimeUnit.SECONDS) ?: return false
             val bm = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            val batStat = registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val sarjli = (batStat?.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) ?: 0) != 0
             val j = JSONObject().put("cihaz", cihaz).put("secret", kod)
                 .put("lat", loc.latitude).put("lng", loc.longitude).put("acc", loc.accuracy.toDouble())
                 .put("batarya", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY))
+                .put("sarj", sarjli)
                 .put("hiz", if (loc.hasSpeed()) loc.speed.toDouble() else JSONObject.NULL)
             post("$sunucu/api/report", j) != null
         } catch (_: Exception) { false }
