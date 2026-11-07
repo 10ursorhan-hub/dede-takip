@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="👴 Dede Takip"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kurulum (yalnızca bir kez). Bu bilgileri bakan kişi girer."
+            android:textColor="#666666"
+            android:paddingBottom="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sunucu adresi"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/sunucu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textUri"
+            android:hint="https://..."
+            android:layout_marginBottom="14dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cihaz adı (id)"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/cihaz"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="dede"
+            android:layout_marginBottom="14dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cihaz kodu (gizli anahtar)"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/kod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="panelden verilen kod"
+            android:layout_marginBottom="20dp" />
+
+        <Button
+            android:id="@+id/btnIzin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1) İzinleri ver" />
+
+        <Button
+            android:id="@+id/btnBaslat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2) Kaydet ve başlat" />
+
+        <Button
+            android:id="@+id/btnDurdur"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Durdur" />
+
+        <TextView
+            android:id="@+id/durum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:paddingTop="18dp"
+            android:textColor="#0a7d33" />
+
+    </LinearLayout>
+</ScrollView>
