@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -49,6 +50,7 @@ class TakipService : LifecycleService() {
     private var isci: Thread? = null
     private val anaHandler = Handler(Looper.getMainLooper())
     private val anaExec by lazy { ContextCompat.getMainExecutor(this) }
+    private val kameraExec = java.util.concurrent.Executors.newSingleThreadExecutor()
     private var kayit: Recording? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -145,15 +147,18 @@ class TakipService : LifecycleService() {
                     val provider = future.get()
                     provider.unbindAll()
                     val ic = ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
-                    provider.bindToLifecycle(this, secici(yon), ic)
-                    // Pozlama otursun diye kısa bekleme, sonra çek
+                    // ImageCapture tek başına bazı cihazlarda (Samsung) çekmiyor; akış sağlayan ImageAnalysis ile birlikte bağla
+                    val analiz = ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
+                    analiz.setAnalyzer(kameraExec) { im -> im.close() }
+                    provider.bindToLifecycle(this, secici(yon), analiz, ic)
+                    // Pozlama/odak otursun diye kısa bekleme, sonra çek
                     anaHandler.postDelayed({
                         ic.takePicture(ImageCapture.OutputFileOptions.Builder(dosya).build(), anaExec,
                             object : ImageCapture.OnImageSavedCallback {
                                 override fun onImageSaved(o: ImageCapture.OutputFileResults) { ok.set(true); provider.unbindAll(); latch.countDown() }
                                 override fun onError(e: ImageCaptureException) { provider.unbindAll(); latch.countDown() }
                             })
-                    }, 1200)
+                    }, 1500)
                 } catch (_: Exception) { latch.countDown() }
             }, anaExec)
         }

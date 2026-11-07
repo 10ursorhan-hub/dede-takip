@@ -6,3 +6,5 @@ local.properties
 *.iml
 gradle/wrapper/gradle-wrapper.jar
 .DS_Store
+app/dede.keystore
+*.apk
