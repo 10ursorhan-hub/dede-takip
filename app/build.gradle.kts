@@ -11,13 +11,31 @@ android {
         applicationId = "com.dedetakip.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.3"
+    }
+
+    // Sabit imza: CI, gizli KEYSTORE_B64 secret'ından app/dede.keystore dosyasını yazar.
+    // Dosya varsa onunla imzala → her güncelleme aynı imza, üstüne kurulur (kaldırmak gerekmez).
+    val ksFile = file("dede.keystore")
+    if (ksFile.exists()) {
+        signingConfigs {
+            create("ortak") {
+                storeFile = ksFile
+                storePassword = System.getenv("KS_PASS") ?: ""
+                keyAlias = "dede"
+                keyPassword = System.getenv("KS_PASS") ?: ""
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            if (ksFile.exists()) signingConfig = signingConfigs.getByName("ortak")
+        }
         release {
             isMinifyEnabled = false
+            if (ksFile.exists()) signingConfig = signingConfigs.getByName("ortak")
         }
     }
     compileOptions {

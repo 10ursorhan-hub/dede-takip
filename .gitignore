@@ -8,3 +8,4 @@ gradle/wrapper/gradle-wrapper.jar
 .DS_Store
 app/dede.keystore
 *.apk
+keystore-base64.txt

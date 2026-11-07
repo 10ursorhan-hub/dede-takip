@@ -26,7 +26,15 @@ jobs:
       - name: Gradle wrapper
         run: gradle wrapper --gradle-version 8.9
 
+      - name: Sabit imza anahtarı (secret varsa)
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then echo "$KS_B64" | base64 -d > app/dede.keystore && echo "sabit imza aktif"; else echo "secret yok; geçici imza ile derlenecek"; fi
+
       - name: APK derle
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: APK'yı adlandır
