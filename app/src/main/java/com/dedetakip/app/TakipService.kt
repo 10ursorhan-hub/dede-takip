@@ -55,7 +55,8 @@ class TakipService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        foreground(false, false)
+        // Kamera + mikrofon tipini servis başlarken (ön planda) al; böylece arka plandan da foto/video çekilebilir.
+        foreground(true, true)
         if (!calisiyor) {
             calisiyor = true
             isci = Thread { dongu() }.apply { isDaemon = true; start() }
@@ -76,18 +77,16 @@ class TakipService : LifecycleService() {
 
     private fun izin(p: String) = checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED
 
-    // Foreground servis tipini çekim anına göre ayarla (Android 14+). Kamera/mikrofon tipi yalnız izin varsa eklenir.
+    // Foreground servis tipi. Kamera/mikrofon tipi ön planda eklenebilir; arka planda (ör. boot) eklenemezse sadece konumla başla.
     private fun foreground(kamera: Boolean, mikrofon: Boolean) {
-        try {
-            if (Build.VERSION.SDK_INT >= 34) {
-                var t = ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                if (kamera && izin(Manifest.permission.CAMERA)) t = t or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
-                if (mikrofon && izin(Manifest.permission.RECORD_AUDIO)) t = t or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-                startForeground(1, bildirim(), t)
-            } else {
-                startForeground(1, bildirim())
-            }
-        } catch (_: Exception) { }
+        if (Build.VERSION.SDK_INT < 34) { try { startForeground(1, bildirim()) } catch (_: Exception) {}; return }
+        var t = ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+        if (kamera && izin(Manifest.permission.CAMERA)) t = t or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+        if (mikrofon && izin(Manifest.permission.RECORD_AUDIO)) t = t or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+        try { startForeground(1, bildirim(), t) }
+        catch (_: Exception) {
+            try { startForeground(1, bildirim(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) } catch (_: Exception) {}
+        }
     }
 
     private fun dongu() {
@@ -143,7 +142,6 @@ class TakipService : LifecycleService() {
         val latch = CountDownLatch(1)
         val ok = java.util.concurrent.atomic.AtomicBoolean(false)
         anaHandler.post {
-            foreground(kamera = true, mikrofon = false)
             val future = ProcessCameraProvider.getInstance(this)
             future.addListener({
                 try {
@@ -166,7 +164,6 @@ class TakipService : LifecycleService() {
             }, anaExec)
         }
         try { latch.await(25, TimeUnit.SECONDS) } catch (_: Exception) { }
-        anaHandler.post { foreground(false, false) }
         if (ok.get() && dosya.exists()) { upload("$sunucu/api/foto", cihaz, kod, dosya.readBytes(), "image/jpeg"); dosya.delete() }
     }
 
@@ -176,7 +173,6 @@ class TakipService : LifecycleService() {
         val sesli = izin(Manifest.permission.RECORD_AUDIO)
         val latch = CountDownLatch(1)
         anaHandler.post {
-            foreground(kamera = true, mikrofon = sesli)
             val future = ProcessCameraProvider.getInstance(this)
             future.addListener({
                 try {
@@ -196,7 +192,6 @@ class TakipService : LifecycleService() {
         }
         try { latch.await(VIDEO_SN + 20, TimeUnit.SECONDS) } catch (_: Exception) { }
         kayit = null
-        anaHandler.post { foreground(false, false) }
         if (dosya.exists() && dosya.length() > 0) { upload("$sunucu/api/video", cihaz, kod, dosya.readBytes(), "video/mp4"); dosya.delete() }
     }
 
