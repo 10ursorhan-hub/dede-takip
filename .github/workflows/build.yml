@@ -19,13 +19,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
-      - name: SDK bileşenleri
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-
+      # ubuntu-latest sunucusunda Android SDK zaten kurulu gelir (ANDROID_SDK_ROOT/ANDROID_HOME).
       - name: local.properties
-        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+        run: echo "sdk.dir=${ANDROID_SDK_ROOT:-$ANDROID_HOME}" > local.properties
 
       - name: Gradle wrapper
         run: gradle wrapper --gradle-version 8.9
